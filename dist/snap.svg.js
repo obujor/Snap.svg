@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
-// build: 2014-10-28
+// build: 2015-03-26
 
 // Copyright (c) 2013 Adobe Systems Incorporated. All rights reserved.
 // 
@@ -3123,13 +3123,14 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
     function fixids(el) {
         var els = el.selectAll("*"),
             it,
-            url = /^\s*url\(("|'|)(.*)\1\)\s*$/,
+            url = /url\(("|'|)(.*)\1\)/,
             ids = [],
             uses = {};
         function urltest(it, name) {
-            var val = $(it.node, name);
-            val = val && val.match(url);
-            val = val && val[2];
+            var initialVal = $(it.node, name);
+            var urlMatch = initialVal && initialVal.match(url);
+            var val = urlMatch && urlMatch[2];
+            urlMatch = urlMatch && urlMatch[0];
             if (val && val.charAt() == "#") {
                 val = val.substring(1);
             } else {
@@ -3138,7 +3139,7 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
             if (val) {
                 uses[val] = (uses[val] || []).concat(function (id) {
                     var attr = {};
-                    attr[name] = URL(id);
+                    attr[name] = initialVal.replace(urlMatch, urlMatch.replace(val, id));
                     $(it.node, attr);
                 });
             }
@@ -3163,6 +3164,7 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
             urltest(it, "filter");
             urltest(it, "mask");
             urltest(it, "clip-path");
+            urltest(it, "style");
             linktest(it);
             var oldid = $(it.node, "id");
             if (oldid) {
@@ -6763,6 +6765,7 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
     Snap.path.toString = toString;
     Snap.path.clone = pathClone;
 });
+
 // Copyright (c) 2013 Adobe Systems Incorporated. All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -7749,6 +7752,7 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
         return this;
     };
 });
+
 // Copyright (c) 2013 Adobe Systems Incorporated. All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");

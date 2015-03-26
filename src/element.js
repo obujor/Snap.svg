@@ -473,13 +473,14 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
     function fixids(el) {
         var els = el.selectAll("*"),
             it,
-            url = /^\s*url\(("|'|)(.*)\1\)\s*$/,
+            url = /url\(("|'|)(.*)\1\)/,
             ids = [],
             uses = {};
         function urltest(it, name) {
-            var val = $(it.node, name);
-            val = val && val.match(url);
-            val = val && val[2];
+            var initialVal = $(it.node, name);
+            var urlMatch = initialVal && initialVal.match(url);
+            var val = urlMatch && urlMatch[2];
+            urlMatch = urlMatch && urlMatch[0];
             if (val && val.charAt() == "#") {
                 val = val.substring(1);
             } else {
@@ -488,7 +489,7 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
             if (val) {
                 uses[val] = (uses[val] || []).concat(function (id) {
                     var attr = {};
-                    attr[name] = URL(id);
+                    attr[name] = initialVal.replace(urlMatch, urlMatch.replace(val, id));
                     $(it.node, attr);
                 });
             }
@@ -513,6 +514,7 @@ Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
             urltest(it, "filter");
             urltest(it, "mask");
             urltest(it, "clip-path");
+            urltest(it, "style");
             linktest(it);
             var oldid = $(it.node, "id");
             if (oldid) {
